@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatización de Consultorios Médicos con n8n</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #004c99;
+            --secondary: #00a3cc;
+            --accent: #008080;
+            --success: #009966;
+            --dark: #1a2433;
+            --gray: #4a5568;
+            --light-gray: #eef2f7;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: #f8fafc;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        .hero-section {
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--dark) 0%, #24344d 50%, var(--primary-dark) 100%);
+            position: relative;
+            padding-bottom: 48px;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.06;
+            background-image: 
+                radial-gradient(circle at 25% 25%, var(--primary) 0%, transparent 45%),
+                radial-gradient(circle at 75% 75%, var(--secondary) 0%, transparent 45%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            justify-content: center;
+            margin-bottom: 36px;
+        }
+
+        .logo-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            box-shadow: 0 6px 24px rgba(0, 102, 204, 0.3);
+        }
+
+        .logo-text {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+        }
+
+        .hero-title {
+            font-size: 1.85rem;
+            font-weight: 700;
+            color: var(--white);
+            text-align: center;
+            margin-bottom: 12px;
+            line-height: 1.25;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.82);
+            text-align: center;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .progress-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 24px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .progress-label {
+            color: var(--white);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .progress-percent {
+            color: var(--secondary);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 100px;
+            overflow: hidden;
+            margin-bottom: 22px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 100px;
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .section-title {
+            color: var(--white);
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        .steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .step-item {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0.4;
+            transition: all 0.4s ease;
+            border: 2px solid transparent;
+        }
+
+        .step-item.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(0, 163, 204, 0.35);
+        }
+
+        .step-item.completed {
+            opacity: 0.85;
+            border-color: rgba(0, 153, 102, 0.35);
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--white);
+            flex-shrink: 0;
+        }
+
+        .step-item.completed .step-number {
+            background: linear-gradient(135deg, var(--success) 0%, #007a4d 100%);
+        }
+
+        .step-item.active .step-number {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            animation: pulse 2.4s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 102, 204, 0.45); }
+            50% { box-shadow: 0 0 0 12px rgba(0, 102, 204, 0); }
+        }
+
+        .step-text {
+            color: var(--white);
+            font-weight: 500;
+            font-size: 0.92rem;
+            line-height: 1.4;
+        }
+
+        .doctor-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+            margin-bottom: 20px;
+        }
+
+        .doctor-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .doctor-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.8rem;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.25);
+        }
+
+        .doctor-info h3 {
+            font-size: 1.2rem;
+            color: var(--dark);
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .doctor-info p {
+            color: var(--gray);
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        .doctor-explanation {
+            color: var(--dark);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .doctor-explanation h4 {
+            color: var(--primary-dark);
+            font-size: 1rem;
+            margin: 14px 0 8px;
+            font-weight: 700;
+        }
+
+        .doctor-explanation p {
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        .doctor-explanation ul {
+            padding-left: 20px;
+            margin-top: 6px;
+        }
+
+        .doctor-explanation li {
+            color: #334155;
+            margin-bottom: 6px;
+            line-height: 1.5;
+            font-size: 0.92rem;
+        }
+
+        .skip-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--white);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 0.98rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .skip-btn:hover {
+            background: var(--white);
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .results-section {
+            display: none;
+            width: 100%;
+            background: var(--light-gray);
+            padding: 40px 16px 56px;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .results-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+            line-height: 1.25;
+        }
+
+        .results-header p {
+            font-size: 1rem;
+            color: var(--gray);
+            line-height: 1.6;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .benefit-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            margin-bottom: 16px;
+            transition: all 0.4s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .benefit-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .benefit-card h3 {
+            font-size: 1.2rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .benefit-card > p {
+            color: var(--gray);
+            line-height: 1.7;
+            font-size: 0.95rem;
+            margin-bottom: 14px;
+        }
+
+        .benefit-features {
+            background: var(--light-gray);
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .benefit-features h5 {
+            color: var(--dark);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .benefit-features ul {
+            padding-left: 18px;
+        }
+
+        .benefit-features li {
+            color: #334155;
+            margin-bottom: 6px;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .cta-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 28px rgba(0, 102, 204, 0.3);
+            transition: all 0.4s ease;
+            margin-top: 20px;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 36px rgba(0, 102, 204, 0.35);
+        }
+
+        .cta-note {
+            color: var(--gray);
+            text-align: center;
+            margin-top: 14px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .fade-in {
+            opacity: 1 !important;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 820px;
+                padding: 40px 24px;
+            }
+
+            .hero-title {
+                font-size: 2.4rem;
+            }
+
+            .benefit-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .benefit-card {
+                margin-bottom: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero-section" id="heroSection">
+        <div class="hero-bg"></div>
+        <div class="container hero-content">
+            <div class="logo">
+                <div class="logo-icon">MA</div>
+                <span class="logo-text">MedAuto Pro</span>
+            </div>
+
+            <h1 class="hero-title">Configuración del sistema de automatización</h1>
+            <p class="hero-subtitle">Descubra cómo integrar su presencia digital con n8n para optimizar la gestión de su consultorio médico.</p>
+
+            <div class="progress-card">
+                <div class="progress-header">
+                    <span class="progress-label">Progreso de configuración</span>
+                    <span class="progress-percent" id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+
+                <h2 class="section-title">Paso a paso</h2>
+                <div class="steps-list" id="stepsList">
+                    <div class="step-item active" id="step1">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Integración de Instagram Business</div>
+                    </div>
+                    <div class="step-item" id="step2">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Configuración de webhook en n8n</div>
+                    </div>
+                    <div class="step-item" id="step3">
+                        <div class="step-number">3</div>
+                        <div class="step-text">Implementación de asistente virtual</div>
+                    </div>
+                    <div class="step-item" id="step4">
+                        <div class="step-number">4</div>
+                        <div class="step-text">Sincronización de calendario</div>
+                    </div>
+                    <div class="step-item" id="step5">
+                        <div class="step-number">5</div>
+                        <div class="step-text">Estrategia de contenido digital</div>
+                    </div>
+                    <div class="step-item" id="step6">
+                        <div class="step-number">6</div>
+                        <div class="step-text">Sistema listo para operar</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="skip-btn" id="skipBtn">Ver sistema completo</button>
+        </div>
+    </section>
+
+    <section class="results-section" id="resultsSection">
+        <div class="container">
+            <div class="results-header">
+                <h1>Sistema operativo</h1>
+                <p>Su consultorio médico cuenta ahora con herramientas digitales para optimizar la gestión diaria y mejorar la experiencia del paciente.</p>
+            </div>
+
+            <div class="benefit-grid">
+                <div class="benefit-card">
+                    <div class="benefit-number">1</div>
+                    <h3>Captación de pacientes potenciales</h3>
+                    <p>Monitoreo continuo de interacciones en Instagram para identificar y clasificar prospectos de manera eficiente.</p>
+                    <div class="benefit-features">
+                        <h5>Funcionalidades clave</h5>
+                        <ul>
+                            <li>Seguimiento de comentarios y mensajes directos</li>
+                            <li>Notificaciones instantáneas de nuevas consultas</li>
+                            <li>Clasificación por tipo de tratamiento</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-number">2</div>
+                    <h3>Asistente virtual inteligente</h3>
+                    <p>Respuestas automatizadas personalizadas que mantienen un tono profesional y humano en todo momento.</p>
+                    <div class="benefit-features">
+                        <h5>Capacidades del asistente</h5>
+                        <ul>
+                            <li>Atención las 24 horas del día</li>
+                            <li>Respuesta a preguntas frecuentes</li>
+                            <li>Información sobre tratamientos y disponibilidad</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-number">3</div>
+                    <h3>Gestión automatizada de citas</h3>
+                    <p>Integración con su calendario para que los pacientes reserven, modifiquen o cancelen consultas sin intervención manual.</p>
+                    <div class="benefit-features">
+                        <h5>Características del sistema</h5>
+                        <ul>
+                            <li>Sincronización con Google Calendar o Calendly</li>
+                            <li>Confirmaciones y recordatorios automáticos</li>
+                            <li>Reducción de ausencias</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-number">4</div>
+                    <h3>Estrategia de contenido y publicidad</h3>
+                    <p>Planificación y ejecución de campañas digitales para aumentar la visibilidad de su consultorio médico.</p>
+                    <div class="benefit-features">
+                        <h5>Elementos incluidos</h5>
+                        <ul>
+                            <li>Publicaciones en feed y historias de Instagram</li>
+                            <li>Videos explicativos de tratamientos</li>
+                            <li>Retargeting de visitantes del perfil</li>
+                            <li>Medición y análisis de resultados</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <button class="cta-btn">Solicitar consultoría personalizada</button>
+            <p class="cta-note">Sesión de 30 minutos sin compromiso · Evaluación gratuita de su consultorio</p>
+        </div>
+    </section>
+
+    <script>
+        const steps = [
+            {
+                id: 'step1',
+                progress: 15,
+                explanation: `
+                    <h4>Integración de Instagram Business</h4>
+                    <p>Establecemos la conexión segura entre su perfil profesional de Instagram y el sistema de automatización, garantizando el cumplimiento de las políticas de privacidad y seguridad de datos.</p>
+                    <ul>
+                        <li>Configuración de credenciales de acceso</li>
+                        <li>Establecimiento de permisos necesarios</li>
+                        <li>Verificación inicial de conectividad</li>
+                    </ul>
+                `
+            },
+            {
+                id: 'step2',
+                progress: 30,
+                explanation: `
+                    <h4>Configuración de webhook en n8n</h4>
+                    <p>Implementamos el punto de conexión que permite la comunicación bidireccional entre Instagram y su sistema de automatización, asegurando la recepción instantánea de todas las interacciones.</p>
+                    <ul>
+                        <li>Creación del endpoint seguro</li>
+                        <li>Configuración de eventos de escucha</li>
+                        <li>Validación de transmisión de datos</li>
+                    </ul>
+                `
+            },
+            {
+                id: 'step3',
+                progress: 45,
+                explanation: `
+                    <h4>Implementación de asistente virtual</h4>
+                    <p>Desarrollamos respuestas personalizadas adaptadas a su especialidad y tono de comunicación, garantizando una interacción coherente y profesional con sus pacientes.</p>
+                    <ul>
+                        <li>Definición de flujos de conversación</li>
+                        <li>Configuración de respuestas a consultas frecuentes</li>
+                        <li>Pruebas de usabilidad y coherencia</li>
+                    </ul>
+                `
+            },
+            {
+                id: 'step4',
+                progress: 60,
+                explanation: `
+                    <h4>Sincronización de calendario</h4>
+                    <p>Integramos su herramienta de gestión de citas preferida para permitir a los pacientes reservar de manera autónoma, manteniendo siempre actualizada su disponibilidad.</p>
+                    <ul>
+                        <li>Vinculación con plataforma de calendario</li>
+                        <li>Configuración de horarios laborales</li>
+                        <li>Establecimiento de recordatorios automáticos</li>
+                    </ul>
+                `
+            },
+            {
+                id: 'step5',
+                progress: 85,
+                explanation: `
+                    <h4>Estrategia de contenido digital</h4>
+                    <p>Diseñamos una planificación de contenido que combine información valiosa para sus pacientes con la promoción adecuada de sus servicios especializados.</p>
+                    <ul>
+                        <li>Planificación de calendario de publicaciones</li>
+                        <li>Creación de formato para videos explicativos</li>
+                        <li>Configuración de segmentación para publicidad</li>
+                    </ul>
+                `
+            },
+            {
+                id: 'step6',
+                progress: 100,
+                explanation: `
+                    <h4>Sistema listo para operar</h4>
+                    <p>Su plataforma de automatización se encuentra completamente configurada y lista para comenzar a optimizar la gestión de su consultorio médico las 24 horas del día.</p>
+                    <ul>
+                        <li>Validación final de todos los flujos</li>
+                        <li>Capacitación básica para su equipo</li>
+                        <li>Establecimiento de métricas de seguimiento</li>
+                    </ul>
+                `
+            }
+        ];
+
+        let currentStep = 0;
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const doctorExplanation = document.getElementById('doctorExplanation');
+        const heroSection = document.getElementById('heroSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const skipBtn = document.getElementById('skipBtn');
+
+        function updateStep() {
+            const step = steps[currentStep];
+
+            steps.forEach((s, index) => {
+                const stepEl = document.getElementById(s.id);
+                if (stepEl) {
+                    if (index < currentStep) {
+                        stepEl.classList.remove('active');
+                        stepEl.classList.add('completed');
+                    } else if (index === currentStep) {
+                        stepEl.classList.add('active');
+                        stepEl.classList.remove('completed');
+                    } else {
+                        stepEl.classList.remove('active', 'completed');
+                    }
+                }
+            });
+
+            progressBar.style.width = step.progress + '%';
+            progressPercent.textContent = step.progress + '%';
+            doctorExplanation.innerHTML = step.explanation;
+
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                setTimeout(updateStep, 3800);
+            } else {
+                setTimeout(showResults, 2200);
+            }
+        }
+
+        function showResults() {
+            heroSection.classList.add('fade-out');
+            setTimeout(() => {
+                heroSection.style.display = 'none';
+                resultsSection.style.display = 'block';
+                setTimeout(() => {
+                    resultsSection.classList.add('fade-in');
+                }, 50);
+            }, 800);
+        }
+
+        skipBtn.addEventListener('click', showResults);
+        setTimeout(updateStep, 1400);
+    </script>
+</body>
+</html>
